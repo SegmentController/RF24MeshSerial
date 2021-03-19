@@ -86,7 +86,7 @@ void setup() {
 
   serialCmd.addCommand("HELP", []() {
     Serial.println(F("BEGIN"));
-    Serial.println(F("NODEID [1..253]"));
+    Serial.println(F("NODEID [0 | 1..253]"));
     Serial.println(F("CHANNEL [0..125]"));
     Serial.println(F("SPEED [0..2]"));
     Serial.println(F("NODELIST"));
@@ -167,13 +167,14 @@ void cmdNodeId() {
     num = atoi(arg);
     if (num < 0 || num > 253) {
       Serial.print(F("ERROR="));
-      Serial.println(F("Invalid nodeid (0..253)"));
+      Serial.print(F("Invalid nodeid (0..253): "));
+      Serial.println(arg);
       return;
     }
     nodeid = num;
     mesh.setNodeID(nodeid);
   }
-  Serial.print(F("NODE="));
+  Serial.print(F("NODEID="));
   Serial.println(nodeid);
 }
 
@@ -186,7 +187,8 @@ void cmdChannel() {
     num = atoi(arg);
     if (num < 0 || num > 125) {
       Serial.print(F("ERROR="));
-      Serial.println(F("Invalid channel (0..125)"));
+      Serial.print(F("Invalid channel (0..125): "));
+      Serial.println(arg);
       return;
     }
     channel = num;
@@ -216,7 +218,8 @@ void cmdSpeed() {
         break;
       default:
         Serial.print(F("ERROR="));
-        Serial.println(F("Invalid speed (0..2)"));
+        Serial.print(F("Invalid speed (0..2): "));
+        Serial.println(arg);
         return;
     }
     if (hasbegin)
