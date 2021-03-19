@@ -122,7 +122,8 @@ void SerialCommand::readSerial() {
         }
       }
       else {
-        (*nullHandler)();
+        if (nullHandler)
+          (*nullHandler)();
       }
       clearBuffer();
     }
