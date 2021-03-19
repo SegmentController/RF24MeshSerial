@@ -1,0 +1,12 @@
+{
+  "name": "RF24MeshSerial",
+  "keywords": "RF24, mesh, communication, serial",
+  "description": "RF24 Mesh devices access by TTY/serial (USB port)",
+  "repository":
+  {
+    "type": "git",
+    "url": "https://github.com/BCsabaEngine/RF24MeshSerial"
+  },
+  "frameworks": "arduino",
+  "platforms": "atmelavr"
+}
