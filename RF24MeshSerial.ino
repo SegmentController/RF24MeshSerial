@@ -28,6 +28,8 @@
 #define RADIO_POWER                 RF24_PA_HIGH      // RF24_PA_MIN, RF24_PA_LOW, RF24_PA_HIGH, RF24_PA_MAX
 #define NETWORK_TIMEOUT_MS          1500              // 1000..15000 (original default 7500, tipical 1500)
 #define NETWORK_DYNAMIC_TX_TIMEOUT                    // If enabled, random additional txTimeout will set
+
+#define MESH_PAYLOAD_MAX_SIZE       128               // Maximum available payload size
 /**
    END OF CONFIGURATION
 **/
@@ -106,50 +108,60 @@ void loop() {
   if (!nodeid)
     mesh.DHCP();
 
-  serialCmd.readSerial();
+  if (network.available())
+    processReceived();
 
-  //  // Check for incoming data from the sensors
-  //  if (network.available()) {
-  //    RF24NetworkHeader header;
-  //    network.peek(header);
-  //
-  //    uint32_t dat = 0;
-  //    switch (header.type) {
-  //      // Display the incoming millis() values from the sensor nodes
-  //      case 'M':
-  //        network.read(header, &dat, sizeof(dat));
-  //        Serial.print(dat);
-  //        Serial.print(" from RF24Network address #0");
-  //        Serial.print(header.from_node, OCT);
-  //        Serial.print(" to #");
-  //        Serial.print(header.to_node, OCT);
-  //        Serial.print(" id #");
-  //        Serial.print(header.id);
-  //        {
-  //          uint8_t nodeid = 0;
-  //          for (uint8_t i = 0; i < mesh.addrListTop; i++)
-  //            if (header.from_node == mesh.addrList[i].address) {
-  //              nodeid = mesh.addrList[i].nodeID;
-  //              break;
-  //            }
-  //          if (nodeid)
-  //          {
-  //            Serial.print(" from ID #");
-  //            Serial.print(nodeid);
-  //          }
-  //        }
-  //        Serial.println();
-  //        break;
-  //      default:
-  //        network.read(header, 0, 0);
-  //        Serial.println(header.type);
-  //        break;
-  //    }
-  //  }
+  serialCmd.readSerial();
 
 #ifdef LOOP_DELAY_MS
   delay(LOOP_DELAY_MS);
 #endif
+}
+
+RF24NetworkHeader rcvHeader;
+byte rcvData[MESH_PAYLOAD_MAX_SIZE];
+void processReceived()
+{
+  if (!network.peek(rcvHeader))
+    return;
+
+  int16_t from_node_id = mesh.getNodeID(rcvHeader.from_node);
+  unsigned char type = rcvHeader.type;
+
+  uint16_t size = network.read(rcvHeader, &rcvData, sizeof(rcvData));
+
+  Serial.print(F("RECEIVE"));
+
+  Serial.print(F(" "));
+
+  Serial.print(F("FROM="));
+  Serial.print(F("0x"));
+  if (from_node_id < 0x10)
+    Serial.print("0");
+  Serial.print(from_node_id, HEX);
+
+  Serial.print(F(" "));
+
+  Serial.print(F("TYPE="));
+  Serial.print(F("0x"));
+  if (type < 0x10)
+    Serial.print("0");
+  Serial.print(type, HEX);
+
+  Serial.print(F(" "));
+
+  Serial.print(F("DATA="));
+  if (size)
+  {
+    Serial.print(F("0x"));
+    for (uint16_t i = 0; i < size; i++)
+    {
+      if (rcvData[i] < 0x10)
+        Serial.print("0");
+      Serial.print(rcvData[i], HEX);
+    }
+  }
+  Serial.println();
 }
 
 void cmdBegin() {
