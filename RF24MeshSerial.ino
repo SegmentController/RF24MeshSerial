@@ -44,6 +44,7 @@ bool hasbegin = false;
 uint8_t nodeid = 0;
 uint8_t channel = DEFAULT_CHANNEL;
 rf24_datarate_e speed = DEFAULT_SPEED;
+void(* rebootFunc) (void) = 0;
 
 void setup() {
   while (!Serial);
@@ -77,6 +78,7 @@ void setup() {
 #endif
 
   serialCmd.addCommand("BEGIN", cmdBegin);
+  serialCmd.addCommand("SEND", cmdSend);
   serialCmd.addCommand("NODEID", cmdNodeId);
   serialCmd.addCommand("CHANNEL", cmdChannel);
   serialCmd.addCommand("SPEED", cmdSpeed);
@@ -85,14 +87,23 @@ void setup() {
     Serial.print(F("UPTIME="));
     Serial.println(millis());
   });
+  serialCmd.addCommand("RESET", []() {
+    Serial.println(F("RESET..."));
+    Serial.println();
+    Serial.flush();
+    rebootFunc();
+  });
 
   serialCmd.addCommand("HELP", []() {
     Serial.println(F("BEGIN"));
-    Serial.println(F("NODEID [0 | 1..253]"));
+    Serial.println(F("SEND NodeId Type Data"));
+    Serial.println(F("ex: SEND 0x20 0x10 0x9D3CE3CBAC8352541647D2417942F56B"));
+    Serial.println(F("NODEID [0 | 0x00 | 0x01..0xFE]"));
     Serial.println(F("CHANNEL [0..125]"));
     Serial.println(F("SPEED [0..2]"));
     Serial.println(F("NODELIST"));
     Serial.println(F("UPTIME"));
+    Serial.println(F("RESET"));
   });
 
   serialCmd.setDefaultHandler([](const char *command) {
@@ -134,7 +145,7 @@ void processReceived()
 
   Serial.print(F(" "));
 
-  Serial.print(F("FROM="));
+  //Serial.print(F("FROM="));
   Serial.print(F("0x"));
   if (from_node_id < 0x10)
     Serial.print("0");
@@ -142,7 +153,7 @@ void processReceived()
 
   Serial.print(F(" "));
 
-  Serial.print(F("TYPE="));
+  //Serial.print(F("TYPE="));
   Serial.print(F("0x"));
   if (type < 0x10)
     Serial.print("0");
@@ -150,7 +161,7 @@ void processReceived()
 
   Serial.print(F(" "));
 
-  Serial.print(F("DATA="));
+  //Serial.print(F("DATA="));
   if (size)
   {
     Serial.print(F("0x"));
@@ -162,6 +173,122 @@ void processReceived()
     }
   }
   Serial.println();
+}
+
+byte sndData[MESH_PAYLOAD_MAX_SIZE];
+int sndLength = 0;
+void cmdSend() {
+  int16_t to_node_id = 0;
+  unsigned char type = 0;
+  char *arg;
+
+  {
+    arg = serialCmd.next();
+    if (arg == NULL) {
+      Serial.print(F("ERROR="));
+      Serial.println(F("NodeId missing"));
+      return;
+    }
+    if (strncmp(arg, "0x", strlen("0x")) != 0)
+    {
+      Serial.print(F("ERROR="));
+      Serial.println(F("NodeId not in HEX format"));
+      return;
+    }
+    if (strlen(arg) != 4)
+    {
+      Serial.print(F("ERROR="));
+      Serial.println(F("NodeId invalid length"));
+      return;
+    }
+    to_node_id = (int)strtol(&arg[2], NULL, 16);
+  }
+
+  {
+    arg = serialCmd.next();
+    if (arg == NULL) {
+      Serial.print(F("ERROR="));
+      Serial.println(F("Type missing"));
+      return;
+    }
+    if (strncmp(arg, "0x", strlen("0x")) != 0)
+    {
+      Serial.print(F("ERROR="));
+      Serial.println(F("Type not in HEX format"));
+      return;
+    }
+    if (strlen(arg) != 4)
+    {
+      Serial.print(F("ERROR="));
+      Serial.println(F("Type invalid length"));
+      return;
+    }
+    type = (char)strtol(&arg[2], NULL, 16);
+    if (type > 127)
+    {
+      Serial.print(F("ERROR="));
+      Serial.println(F("Type invalid value"));
+      return;
+    }
+  }
+
+  {
+    arg = serialCmd.next();
+    if (arg == NULL) {
+      Serial.print(F("ERROR="));
+      Serial.println(F("Data missing"));
+      return;
+    }
+    if (strncmp(arg, "0x", strlen("0x")) != 0)
+    {
+      Serial.print(F("ERROR="));
+      Serial.println(F("Data not in HEX format"));
+      return;
+    }
+    if (strlen(arg) < 4 || (strlen(arg) % 2) != 0)
+    {
+      Serial.print(F("ERROR="));
+      Serial.println(F("Data invalid length"));
+      return;
+    }
+    sndLength = 0;
+    for (int i = 2; i < strlen(arg); i += 2)
+    {
+      char c1 = arg[i];
+      byte b1 = 0;
+      if (c1 >= '0' && c1 <= '9') b1 = c1 - '0';
+      else if (c1 >= 'A' && c1 <= 'F') b1 = c1 - 'A' + 10;
+      else if (c1 >= 'a' && c1 <= 'f') b1 = c1 - 'a' + 10;
+      else
+      {
+        Serial.print(F("ERROR="));
+        Serial.print(F("Data invalid char: "));
+        Serial.println(c1);
+        return;
+      }
+
+      char c2 = arg[i + 1];
+      byte b2 = 0;
+      if (c2 >= '0' && c2 <= '9') b2 = c2 - '0';
+      else if (c2 >= 'A' && c2 <= 'F') b2 = c2 - 'A' + 10;
+      else if (c2 >= 'a' && c2 <= 'f') b2 = c2 - 'a' + 10;
+      else
+      {
+        Serial.print(F("ERROR="));
+        Serial.print(F("Data invalid char: "));
+        Serial.println(c2);
+        return;
+      }
+
+      sndData[sndLength] = b1 * 16 + b2;
+      sndLength++;
+    }
+  }
+
+  if (mesh.write(&sndData, type, sndLength, to_node_id))
+    Serial.println(F("SENT"));
+  else
+    Serial.println(F("NOT SENT"));
 }
 
 void cmdBegin() {
@@ -176,18 +303,40 @@ void cmdNodeId() {
 
   arg = serialCmd.next();
   if (arg != NULL) {
-    num = atoi(arg);
-    if (num < 0 || num > 253) {
+    if (strcmp(arg, "0") == 0)
+    {
+      num = 0;
+    }
+    else
+    {
+      if (strncmp(arg, "0x", strlen("0x")) != 0)
+      {
+        Serial.print(F("ERROR="));
+        Serial.println(F("NodeId not in HEX format"));
+        return;
+      }
+      if (strlen(arg) != 4)
+      {
+        Serial.print(F("ERROR="));
+        Serial.println(F("NodeId invalid length"));
+        return;
+      }
+      num = (char)strtol(&arg[2], NULL, 16);
+    }
+    if (num > 253)
+    {
       Serial.print(F("ERROR="));
-      Serial.print(F("Invalid nodeid (0..253): "));
-      Serial.println(arg);
+      Serial.println(F("NodeId invalid value"));
       return;
     }
     nodeid = num;
     mesh.setNodeID(nodeid);
   }
   Serial.print(F("NODEID="));
-  Serial.println(nodeid);
+  Serial.print(F("0x"));
+  if (nodeid < 0x10)
+    Serial.print("0");
+  Serial.println(nodeid, HEX);
 }
 
 void cmdChannel() {
@@ -256,7 +405,10 @@ void cmdNodeList()
 {
   Serial.println(F("NODELIST"));
   for (int i = 0; i < mesh.addrListTop; i++) {
-    Serial.print(mesh.addrList[i].nodeID);
+    Serial.print(F("0x"));
+    if (mesh.addrList[i].nodeID < 0x10)
+      Serial.print("0");
+    Serial.print(mesh.addrList[i].nodeID, HEX);
     Serial.print(F("="));
     Serial.println(mesh.addrList[i].address, OCT);
   }
