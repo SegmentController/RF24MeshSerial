@@ -8,7 +8,6 @@
 #include <RF24Network.h>
 #include <RF24.h>
 #include <RF24Mesh.h>
-#include <EEPROM.h> //Include eeprom.h by RF24Mesh for AVR (Uno, Nano) etc. except ATTiny
 
 /**
    SKETCH-WIDE CONFIGURATION
