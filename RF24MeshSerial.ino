@@ -21,7 +21,7 @@
 #define START_DELAY_MS              500               // Some hardware bootup time
 #define LOOP_DELAY_MS               20                // Some cool-down sleep
 
-#define AUTOBEGIN_AS_MASTER                           // Autostart as master (nodeID = 0)
+//#define AUTOBEGIN_AS_MASTER                           // Autostart as master (nodeID = 0)
 #define DEFAULT_CHANNEL             90                // 0..125 (2.400 to 2.525)
 #define DEFAULT_SPEED               RF24_250KBPS      // RF24_250KBPS, RF24_1MBPS or RF24_2MBPS
 #define MASH_AUTORENEW_INTERVAL_MS  1250              // Non-master node automatic mesh connection check (and renew if needed) in every x ms
@@ -98,6 +98,7 @@ void setup() {
   serialCmd.addCommand("RESET", []() {
     Serial.println(F("RESET"));
     Serial.flush();
+    delay(1500);
     rebootFunc();
   });
 
