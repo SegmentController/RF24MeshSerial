@@ -1,8 +1,8 @@
-//TODO: non-master mode: checkconnection and test;
-
 /**
    RF24MeshSerial
 **/
+
+#define RF24MESHSERIAL_VERSION      "1.0"
 
 #include <SPI.h>
 #include <RF24.h>
@@ -70,6 +70,7 @@ void setup() {
   network.txTimeout = random(400, 750);
 #endif
 
+  cmdVersion();
   Serial.println(F("READY"));
 
 #ifdef AUTOBEGIN_AS_MASTER
@@ -89,6 +90,7 @@ void setup() {
   serialCmd.addCommand("CHANNEL", cmdChannel);
   serialCmd.addCommand("SPEED", cmdSpeed);
   serialCmd.addCommand("NODELIST", cmdNodeList);
+  serialCmd.addCommand("VERSION", cmdVersion);
   serialCmd.addCommand("UPTIME", []() {
     Serial.print(F("UPTIME "));
     Serial.println(millis());
@@ -113,6 +115,7 @@ void setup() {
     Serial.println(F("SPEED [0..2]"));
     if (!nodeid)
       Serial.println(F("NODELIST"));
+    Serial.println(F("VERSION"));
     Serial.println(F("UPTIME"));
     Serial.println(F("RESET"));
   });
@@ -193,6 +196,11 @@ void processReceived()
     }
   }
   Serial.println();
+}
+
+void cmdVersion() {
+  Serial.print(F("VERSION "));
+  Serial.println(RF24MESHSERIAL_VERSION);
 }
 
 byte sndData[MESH_PAYLOAD_MAX_SIZE];
