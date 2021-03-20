@@ -248,33 +248,25 @@ void cmdSend() {
       }
       for (int i = 2; i < strlen(arg); i += 2)
       {
-        char c1 = arg[i];
-        byte b1 = 0;
-        if (c1 >= '0' && c1 <= '9') b1 = c1 - '0';
-        else if (c1 >= 'A' && c1 <= 'F') b1 = c1 - 'A' + 10;
-        else if (c1 >= 'a' && c1 <= 'f') b1 = c1 - 'a' + 10;
-        else
+        byte d = 0;
+        for (int j = 0; j < 2; j++)
         {
-          Serial.print(F("ERROR "));
-          Serial.print(F("Data invalid char: "));
-          Serial.println(c1);
-          return;
+          d *= 16;
+
+          char c = arg[i + j];
+          if (c >= '0' && c <= '9') d += c - '0';
+          else if (c >= 'A' && c <= 'F') d += c - 'A' + 10;
+          else if (c >= 'a' && c <= 'f') d += c - 'a' + 10;
+          else
+          {
+            Serial.print(F("ERROR "));
+            Serial.print(F("Data invalid char: "));
+            Serial.println(c);
+            return;
+          }
         }
 
-        char c2 = arg[i + 1];
-        byte b2 = 0;
-        if (c2 >= '0' && c2 <= '9') b2 = c2 - '0';
-        else if (c2 >= 'A' && c2 <= 'F') b2 = c2 - 'A' + 10;
-        else if (c2 >= 'a' && c2 <= 'f') b2 = c2 - 'a' + 10;
-        else
-        {
-          Serial.print(F("ERROR "));
-          Serial.print(F("Data invalid char: "));
-          Serial.println(c2);
-          return;
-        }
-
-        sndData[sndLength] = b1 * 16 + b2;
+        sndData[sndLength] = d;
         sndLength++;
       }
     }
