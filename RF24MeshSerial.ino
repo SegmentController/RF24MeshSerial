@@ -98,7 +98,7 @@ void setup() {
 
   serialCmd.addCommand("HELP", []() {
     Serial.println(F("BEGIN"));
-    Serial.println(F("SEND NodeId Type Data"));
+    Serial.println(F("SEND NodeId Type [Data]"));
     Serial.println(F("ex: SEND 0x20 0x10 0x9D3CE3CBAC8352541647D2417942F56B"));
     Serial.println(F("NODEID [0 | 0x00 | 0x01..0xFE]"));
     Serial.println(F("CHANNEL [0..125]"));
@@ -206,88 +206,87 @@ void cmdSend() {
   {
     arg = serialCmd.next();
     if (arg == NULL) {
-      Serial.print(F("ERROR="));
+      Serial.print(F("ERROR "));
       Serial.println(F("Type missing"));
       return;
     }
     if (strncmp(arg, "0x", strlen("0x")) != 0)
     {
-      Serial.print(F("ERROR="));
+      Serial.print(F("ERROR "));
       Serial.println(F("Type not in HEX format"));
       return;
     }
     if (strlen(arg) != 4)
     {
-      Serial.print(F("ERROR="));
+      Serial.print(F("ERROR "));
       Serial.println(F("Type invalid length"));
       return;
     }
     type = (char)strtol(&arg[2], NULL, 16);
     if (type > 127)
     {
-      Serial.print(F("ERROR="));
+      Serial.print(F("ERROR "));
       Serial.println(F("Type invalid value"));
       return;
     }
   }
 
   {
-    arg = serialCmd.next();
-    if (arg == NULL) {
-      Serial.print(F("ERROR="));
-      Serial.println(F("Data missing"));
-      return;
-    }
-    if (strncmp(arg, "0x", strlen("0x")) != 0)
-    {
-      Serial.print(F("ERROR="));
-      Serial.println(F("Data not in HEX format"));
-      return;
-    }
-    if (strlen(arg) < 4 || (strlen(arg) % 2) != 0)
-    {
-      Serial.print(F("ERROR="));
-      Serial.println(F("Data invalid length"));
-      return;
-    }
     sndLength = 0;
-    for (int i = 2; i < strlen(arg); i += 2)
-    {
-      char c1 = arg[i];
-      byte b1 = 0;
-      if (c1 >= '0' && c1 <= '9') b1 = c1 - '0';
-      else if (c1 >= 'A' && c1 <= 'F') b1 = c1 - 'A' + 10;
-      else if (c1 >= 'a' && c1 <= 'f') b1 = c1 - 'a' + 10;
-      else
+    arg = serialCmd.next();
+    if (arg != NULL) {
+      if (strncmp(arg, "0x", strlen("0x")) != 0)
       {
-        Serial.print(F("ERROR="));
-        Serial.print(F("Data invalid char: "));
-        Serial.println(c1);
+        Serial.print(F("ERROR "));
+        Serial.println(F("Data not in HEX format"));
         return;
       }
-
-      char c2 = arg[i + 1];
-      byte b2 = 0;
-      if (c2 >= '0' && c2 <= '9') b2 = c2 - '0';
-      else if (c2 >= 'A' && c2 <= 'F') b2 = c2 - 'A' + 10;
-      else if (c2 >= 'a' && c2 <= 'f') b2 = c2 - 'a' + 10;
-      else
+      if (strlen(arg) < 4 || (strlen(arg) % 2) != 0)
       {
-        Serial.print(F("ERROR="));
-        Serial.print(F("Data invalid char: "));
-        Serial.println(c2);
+        Serial.print(F("ERROR "));
+        Serial.println(F("Data invalid length"));
         return;
       }
+      for (int i = 2; i < strlen(arg); i += 2)
+      {
+        char c1 = arg[i];
+        byte b1 = 0;
+        if (c1 >= '0' && c1 <= '9') b1 = c1 - '0';
+        else if (c1 >= 'A' && c1 <= 'F') b1 = c1 - 'A' + 10;
+        else if (c1 >= 'a' && c1 <= 'f') b1 = c1 - 'a' + 10;
+        else
+        {
+          Serial.print(F("ERROR "));
+          Serial.print(F("Data invalid char: "));
+          Serial.println(c1);
+          return;
+        }
 
-      sndData[sndLength] = b1 * 16 + b2;
-      sndLength++;
+        char c2 = arg[i + 1];
+        byte b2 = 0;
+        if (c2 >= '0' && c2 <= '9') b2 = c2 - '0';
+        else if (c2 >= 'A' && c2 <= 'F') b2 = c2 - 'A' + 10;
+        else if (c2 >= 'a' && c2 <= 'f') b2 = c2 - 'a' + 10;
+        else
+        {
+          Serial.print(F("ERROR "));
+          Serial.print(F("Data invalid char: "));
+          Serial.println(c2);
+          return;
+        }
+
+        sndData[sndLength] = b1 * 16 + b2;
+        sndLength++;
+      }
     }
   }
 
   if (mesh.write(&sndData, type, sndLength, to_node_id))
     Serial.println(F("SENT"));
-  else
+  else  {
+    Serial.print(F("ERROR "));
     Serial.println(F("NOT SENT"));
+  }
 }
 
 void cmdBegin() {
