@@ -24,10 +24,11 @@
 #define AUTOBEGIN_AS_MASTER                           // Autostart as master (nodeID = 0)
 #define DEFAULT_CHANNEL             90                // 0..125 (2.400 to 2.525)
 #define DEFAULT_SPEED               RF24_250KBPS      // RF24_250KBPS, RF24_1MBPS or RF24_2MBPS
+#define MASH_AUTORENEW_INTERVAL_MS  1250              // Non-master node automatic mesh connection check (and renew if needed) in every x ms
 
 #define RADIO_CE_CS_PIN             10,9              // RFnano=(10,9) or (9,10); Nano typical=(7,8)
 #define RADIO_POWER                 RF24_PA_HIGH      // RF24_PA_MIN, RF24_PA_LOW, RF24_PA_HIGH, RF24_PA_MAX
-#define NETWORK_TIMEOUT_MS          1500              // 1000..15000 (original default 7500, tipical 1500)
+#define NETWORK_TIMEOUT_MS          1500              // Network operation (dhcp, renew) timeout 1000..15000 (original default 7500, tipical 1500)
 #define NETWORK_DYNAMIC_TX_TIMEOUT                    // If enabled, random additional txTimeout will set
 
 #define MESH_PAYLOAD_MAX_SIZE       128               // Maximum available payload size
@@ -45,6 +46,8 @@ bool hasbegin = false;
 uint8_t nodeid = 0;
 uint8_t channel = DEFAULT_CHANNEL;
 rf24_datarate_e speed = DEFAULT_SPEED;
+unsigned long lastcheck = 0;
+
 void(* rebootFunc) (void) = 0;
 
 void setup() {
@@ -80,6 +83,8 @@ void setup() {
 
   serialCmd.addCommand("BEGIN", cmdBegin);
   serialCmd.addCommand("SEND", cmdSend);
+  serialCmd.addCommand("CHECK", cmdCheck);
+  serialCmd.addCommand("RENEW", cmdRenew);
   serialCmd.addCommand("NODEID", cmdNodeId);
   serialCmd.addCommand("CHANNEL", cmdChannel);
   serialCmd.addCommand("SPEED", cmdSpeed);
@@ -89,8 +94,7 @@ void setup() {
     Serial.println(millis());
   });
   serialCmd.addCommand("RESET", []() {
-    Serial.println(F("RESET..."));
-    Serial.println();
+    Serial.println(F("RESET"));
     Serial.flush();
     rebootFunc();
   });
@@ -99,10 +103,16 @@ void setup() {
     Serial.println(F("BEGIN"));
     Serial.println(F("SEND NodeId Type [Data]"));
     Serial.println(F("ex: SEND 0x20 0x10 0x9D3CE3CBAC8352541647D2417942F56B"));
+    if (nodeid)
+    {
+      Serial.println(F("CHECK"));
+      Serial.println(F("RENEW"));
+    }
     Serial.println(F("NODEID [0 | 0x00 | 0x01..0xFE]"));
     Serial.println(F("CHANNEL [0..125]"));
     Serial.println(F("SPEED [0..2]"));
-    Serial.println(F("NODELIST"));
+    if (!nodeid)
+      Serial.println(F("NODELIST"));
     Serial.println(F("UPTIME"));
     Serial.println(F("RESET"));
   });
@@ -118,7 +128,19 @@ void loop() {
   mesh.update();
 
   if (!nodeid)
-    mesh.DHCP();
+    if (hasbegin)
+      mesh.DHCP();
+
+#ifdef MASH_AUTORENEW_INTERVAL_MS
+  if (nodeid)
+    if (millis() - lastcheck > MASH_AUTORENEW_INTERVAL_MS)
+      if (hasbegin)
+      {
+        if (!mesh.checkConnection())
+          cmdRenew();
+        lastcheck = millis();
+      }
+#endif
 
   if (network.available())
     processReceived();
@@ -280,10 +302,53 @@ void cmdSend() {
   }
 }
 
+void cmdCheck() {
+  if (!nodeid)
+  {
+    Serial.print(F("ERROR "));
+    Serial.println(F("Check available on non-master only"));
+    return;
+  }
+
+  if (!hasbegin)
+  {
+    Serial.print(F("ERROR "));
+    Serial.println(F("Connection not started (BEGIN)"));
+    return;
+  }
+
+  if (mesh.checkConnection())
+    Serial.println(F("CHECK OK"));
+  else
+    Serial.println(F("CHECK FAILED"));
+}
+
+void cmdRenew() {
+  if (!nodeid)
+  {
+    Serial.print(F("ERROR "));
+    Serial.println(F("Renew available on non-master only"));
+    return;
+  }
+
+  if (!hasbegin)
+    cmdBegin();
+  else
+  {
+    mesh.renewAddress(NETWORK_TIMEOUT_MS);
+    if (mesh.checkConnection())
+      Serial.println(F("RENEW OK"));
+    else
+      Serial.println(F("RENEW FAILED"));
+  }
+}
+
 void cmdBegin() {
-  mesh.begin(channel, speed, NETWORK_TIMEOUT_MS);
   hasbegin = true;
   Serial.println(F("BEGIN"));
+  mesh.begin(channel, speed, NETWORK_TIMEOUT_MS);
+
+  cmdCheck();
 }
 
 void cmdNodeId() {
@@ -392,6 +457,12 @@ void cmdSpeed() {
 
 void cmdNodeList()
 {
+  if (nodeid)
+  {
+    Serial.print(F("ERROR "));
+    Serial.println(F("Node list available on master only"));
+    return;
+  }
   Serial.println(F("NODELIST"));
   for (int i = 0; i < mesh.addrListTop; i++) {
     Serial.print(F("0x"));
