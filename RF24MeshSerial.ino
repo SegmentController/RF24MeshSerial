@@ -1,3 +1,5 @@
+//TODO: non-master mode: checkconnection and test;
+
 /**
    RF24MeshSerial
 **/
@@ -15,7 +17,7 @@
    Some parameter can be set at runtime
 **/
 #define SERIAL_SPEED                115200
-//#define SERIAL_COMMAND_ECHO                           // Enable echo of input (use SmarTTY instead)
+//#define SERIAL_COMMAND_ECHO                           // Enable echo of input (use SmarTTY or Arduino IDE COM window instead)
 
 #define START_DELAY_MS              500               // Some hardware bootup time
 #define LOOP_DELAY_MS               20                // Some cool-down sleep
