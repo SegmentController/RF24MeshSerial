@@ -307,7 +307,7 @@ void cmdSend() {
     Serial.println(F("SENT"));
   else  {
     Serial.print(F("ERROR "));
-    Serial.println(F("NOT SENT"));
+    Serial.println(F("Not sent"));
   }
 }
 
@@ -329,7 +329,10 @@ void cmdCheck() {
   if (mesh.checkConnection())
     Serial.println(F("CHECK OK"));
   else
-    Serial.println(F("CHECK FAILED"));
+  {
+    Serial.print(F("ERROR "));
+    Serial.println(F("Check failed"));
+  }
 }
 
 void cmdRenew() {
@@ -348,17 +351,24 @@ void cmdRenew() {
     if (mesh.checkConnection())
       Serial.println(F("RENEW OK"));
     else
-      Serial.println(F("RENEW FAILED"));
+    {
+      Serial.print(F("ERROR "));
+      Serial.println(F("Renew failed"));
+    }
   }
 }
 
 void cmdBegin() {
   hasbegin = true;
-  Serial.println(F("BEGIN"));
   mesh.begin(channel, speed, NETWORK_TIMEOUT_MS);
 
-  if (nodeid)
-    cmdCheck();
+  if (!nodeid || mesh.checkConnection())
+    Serial.println(F("BEGIN OK"));
+  else
+  {
+    Serial.print(F("ERROR "));
+    Serial.println(F("Begin failed"));
+  }
 }
 
 void cmdNodeId() {
