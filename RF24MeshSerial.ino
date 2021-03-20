@@ -348,7 +348,8 @@ void cmdBegin() {
   Serial.println(F("BEGIN"));
   mesh.begin(channel, speed, NETWORK_TIMEOUT_MS);
 
-  cmdCheck();
+  if (nodeid)
+    cmdCheck();
 }
 
 void cmdNodeId() {
