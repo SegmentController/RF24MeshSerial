@@ -27,8 +27,7 @@
  * Constructor makes sure some things are set.
  */
 SerialCommand::SerialCommand()
-  : commandList(NULL),
-    commandCount(0),
+  : commandCount(0),
     defaultHandler(NULL),
     nullHandler(NULL),
     term('\n'),           
@@ -52,7 +51,9 @@ void SerialCommand::addCommand(const char *command, void (*function)()) {
     Serial.println(command);
   #endif
 
-  commandList = (SerialCommandCallback *) realloc(commandList, (commandCount + 1) * sizeof(SerialCommandCallback));
+  if (commandCount >= SERIALCOMMAND_MAXCOMMANDCOUNT)
+    return;
+
   strncpy(commandList[commandCount].command, command, SERIALCOMMAND_MAXCOMMANDLENGTH);
   commandList[commandCount].function = function;
   commandCount++;

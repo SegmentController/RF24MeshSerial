@@ -34,9 +34,11 @@
 #include <string.h>
 
 // Size of the input buffer in bytes (maximum length of one command plus arguments)
-#define SERIALCOMMAND_BUFFER 128
+#define SERIALCOMMAND_BUFFER 256
 // Maximum length of a command excluding the terminating null
-#define SERIALCOMMAND_MAXCOMMANDLENGTH 8
+#define SERIALCOMMAND_MAXCOMMANDLENGTH 12
+// Maximum length of a command excluding the terminating null
+#define SERIALCOMMAND_MAXCOMMANDCOUNT 12
 
 // Uncomment the next line to run the library in debug mode (verbose messages)
 //#define SERIALCOMMAND_DEBUG
@@ -59,7 +61,7 @@ class SerialCommand {
       char command[SERIALCOMMAND_MAXCOMMANDLENGTH + 1];
       void (*function)();
     };                                    // Data structure to hold Command/Handler function key-value pairs
-    SerialCommandCallback *commandList;   // Actual definition for command/handler array
+    SerialCommandCallback commandList[SERIALCOMMAND_MAXCOMMANDCOUNT];   // Actual definition for command/handler array
     byte commandCount;
 
     // Pointer to the default handler function
