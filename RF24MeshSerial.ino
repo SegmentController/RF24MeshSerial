@@ -141,7 +141,7 @@ void loop() {
       if (hasbegin)
       {
         if (!mesh.checkConnection())
-          cmdRenew();
+          cmdRenew(true);
         lastcheck = millis();
       }
 #endif
@@ -336,6 +336,10 @@ void cmdCheck() {
 }
 
 void cmdRenew() {
+  cmdRenew(false);
+}
+
+void cmdRenew(bool autorenew) {
   if (!nodeid)
   {
     Serial.print(F("ERROR "));
@@ -349,11 +353,11 @@ void cmdRenew() {
   {
     mesh.renewAddress(NETWORK_TIMEOUT_MS);
     if (mesh.checkConnection())
-      Serial.println(F("RENEW OK"));
+      Serial.println(autorenew ? F("AUTORENEW OK") : F("RENEW OK"));
     else
     {
       Serial.print(F("ERROR "));
-      Serial.println(F("Renew failed"));
+      Serial.println(autorenew ? F("Auto renew failed") : F("Renew failed"));
     }
   }
 }
