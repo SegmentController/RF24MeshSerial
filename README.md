@@ -21,6 +21,9 @@ This is how the idea of a small firmware that can be installed on an Arduino NAN
 - RECEIVE
 - CHECK (network)
 - RENEW (address)
+- UPTIME
+- VERSION
+- HELP :)
 
 # Hardware
 You can use it on any Arduino to which an nRF24 chip is attached. Or you can use the NanoRF module immediately without soldering. The USB port is suitable for upload code, through which it receives the power supply and you can also implement the serial port communication on this. All you need is a USB data cable! A 30cm is enough, but the length doesn't matter, it can be up to 2m.
@@ -40,3 +43,6 @@ You need to install RF24Mesh (and RF24Network and RF24) library into Arduino IDE
 
 # Memory usage
 Default compile for Arduino NANO in Arduino IDE: Sketch size 16612 bytes (54%), variables are 1496 bytes (73%).
+
+# Try it!
+Grab an Arduino RF Nano, upload the code on it and use a COM port monitor to see what you see. Try a few commands on the COM port. You are ready to create the RF24Mesh network!
