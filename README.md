@@ -2,13 +2,14 @@
 Firmware for run RF24 Mesh network on ARM devices and access over TTY/serial (USB port)
 
 # Why?
-I love RF24 devices. With the help of RF24Mesh I can create automatic networks, I can run the network master node on an Arduino Nano with low memory usage. My favorite library is nRF24/RF24Mesh. But I ran into an obstacle when I wanted to use it on a simple PC.
+I love RF24 devices. With the help of RF24Mesh I can create automatic networks, I can run the network master node on an Arduino Nano with low memory usage. My favorite library is nRF24/RF24Mesh (https://github.com/nRF24/RF24Mesh). But I ran into an obstacle when I wanted to use it on a simple PC.
 
 Although it works on RPi, I have a hard time explaining to my customers what hardware configuration they can use to install and operate nRF24 and python and linux libs and gcc config. Error detection is also cumbersome. And on a Windows PC, I was completely clueless.
 
 # Solution
 I want to make an intermediate hardware that:
 - manages the entire mesh network
+- use lib nRF24/RF24Mesh (https://github.com/nRF24/RF24Mesh)
 - not my CPU works with RF24 connection
 - low energy and easy to install
 
