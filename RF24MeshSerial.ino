@@ -2,7 +2,7 @@
    RF24MeshSerial
 **/
 
-#define RF24MESHSERIAL_VERSION      "1.0"
+#define RF24MESHSERIAL_VERSION      "1.0.1"
 
 #include <SPI.h>
 #include <RF24.h>
