@@ -51,6 +51,7 @@ Default compile for Arduino Nano in Arduino IDE: Sketch size 16612 bytes (54%), 
 # Try it!
 Grab an Arduino RF Nano, upload the code on it and use a COM port monitor to see the engine. Try a few commands on the COM port. You are ready to create the RF24Mesh network!
 
+
 Example, type (bold text) these lines to master node and see results (normal text):
 
 VERSION 1.0
@@ -70,6 +71,7 @@ NODEID 0x0
 BEGIN OK
 
 **SEND 0x12 0x00 0x112233**
+
 
 
 Example, type (bold text) these lines to node with id 0x12 and see results (normal text):
