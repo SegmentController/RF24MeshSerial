@@ -71,7 +71,7 @@ void setup() {
 #endif
 
   cmdVersion();
-  Serial.println(F("READY"));
+  cmdHello();
 
 #ifdef AUTOBEGIN_AS_MASTER
   nodeid = 0;
@@ -82,6 +82,7 @@ void setup() {
   cmdSpeed();
 #endif
 
+  serialCmd.addCommand("HELLO", cmdHello);
   serialCmd.addCommand("BEGIN", cmdBegin);
   serialCmd.addCommand("SEND", cmdSend);
   serialCmd.addCommand("CHECK", cmdCheck);
@@ -103,6 +104,7 @@ void setup() {
   });
 
   serialCmd.addCommand("HELP", []() {
+    Serial.println(F("HELLO"));
     Serial.println(F("BEGIN"));
     Serial.println(F("SEND NodeId Type [Data]"));
     Serial.println(F("ex: SEND 0x20 0x10 0x9D3CE3CBAC8352541647D2417942F56B"));
@@ -197,6 +199,10 @@ void processReceived()
     }
   }
   Serial.println();
+}
+
+void cmdHello() {
+  Serial.println(F("READY"));
 }
 
 void cmdVersion() {
