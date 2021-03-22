@@ -17,6 +17,7 @@ This is how the idea of a small firmware that can be installed on an Arduino Nan
 - GET/SET NODEID
 - GET/SET CHANNEL
 - GET/SET SPEED
+- HELLO
 - BEGIN
 - SEND
 - RECEIVE
