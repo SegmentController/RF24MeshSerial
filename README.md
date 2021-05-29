@@ -17,9 +17,11 @@ This is how the idea of a small firmware that can be installed on an Arduino Nan
 - GET/SET NODEID
 - GET/SET CHANNEL
 - GET/SET SPEED
+- GET/SET RETRY
 - HELLO
 - BEGIN
 - SEND
+- HEARTBEAT
 - RECEIVE
 - CHECK (network)
 - RENEW (address)
@@ -47,7 +49,7 @@ Modified SerialCommand library included/embed in project. It is optimized for th
 You need to install manually the RF24Mesh (and RF24Network and RF24) library into Arduino IDE to compile.
 
 # Memory usage
-Default compile for Arduino Nano in Arduino IDE: Sketch size 16612 bytes (54%), variables are 1496 bytes (73%).
+Default compile for Arduino Nano in Arduino IDE: Sketch size 18648 bytes (60%), variables are 1540 bytes (75%).
 
 # Try it!
 Grab an Arduino RF Nano, upload the code on it and use a COM port monitor to see the engine. Try a few commands on the COM port. You are ready to create the RF24Mesh network!
