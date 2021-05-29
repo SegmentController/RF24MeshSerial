@@ -1,41 +1,41 @@
 /**
- * SerialCommand - A Wiring/Arduino library to tokenize and parse commands
- * received over a serial port.
- * 
- * Copyright (C) 2021 Csaba Balazs
- * Copyright (C) 2012 Stefan Rado
- * Copyright (C) 2011 Steven Cogswell <steven.cogswell@gmail.com>
- *                    http://husks.wordpress.com
- * 
- * Version 20210320
- * 
- * Optimized version for RF24MeshSerial project:
- *   Static memory handling (instead of c++ realloc)
- *   Buffer sizes
- *   All pull-request (active at 2021-03-18) merged to source
- * 
- * This library is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this library.  If not, see <http://www.gnu.org/licenses/>.
- */
+   SerialCommand - A Wiring/Arduino library to tokenize and parse commands
+   received over a serial port.
+
+   Copyright (C) 2021 Csaba Balazs
+   Copyright (C) 2012 Stefan Rado
+   Copyright (C) 2011 Steven Cogswell <steven.cogswell@gmail.com>
+                      http://husks.wordpress.com
+
+   Version 20210320
+
+   Optimized version for RF24MeshSerial project:
+     Static memory handling (instead of c++ realloc)
+     Buffer sizes
+     All pull-request (active at 2021-03-18) merged to source
+
+   This library is free software: you can redistribute it and/or modify
+   it under the terms of the GNU Lesser General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+
+   This library is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU Lesser General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this library.  If not, see <http://www.gnu.org/licenses/>.
+*/
 #ifndef SerialCommand_h
 #define SerialCommand_h
 
 #if defined(WIRING) && WIRING >= 100
-  #include <Wiring.h>
+#include <Wiring.h>
 #elif defined(ARDUINO) && ARDUINO >= 100
-  #include <Arduino.h>
+#include <Arduino.h>
 #else
-  #include <WProgram.h>
+#include <WProgram.h>
 #endif
 #include <string.h>
 
@@ -74,7 +74,7 @@ class SerialCommand {
     void (*defaultHandler)(const char *);
     // Pointer to the null handler function
     void (*nullHandler)();
-    
+
     char delim[2]; // null-terminated list of character to be used as delimeters for tokenizing (default " ")
     char term;     // Character that signals end of command (default '\n')
     char term2;    // Character that signals end of command (default '\r')
