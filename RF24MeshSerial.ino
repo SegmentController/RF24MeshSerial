@@ -50,7 +50,7 @@
 typedef uint16_t pin_ce_cs_t[2];
 
 SerialCommand serialCmd;
-RF24* radio;
+RF24* radio = NULL;
 RF24Network network(*radio);
 RF24Mesh mesh(*radio, network);
 bool hasbegin = false;
@@ -85,11 +85,12 @@ void setup() {
   pin_ce_cs_t ce_cs_pins[] = RADIO_CE_CS_PINS;
   for (int pi = 0; pi < sizeof(ce_cs_pins) / sizeof(pin_ce_cs_t); pi++)
   {
-    radio = new RF24(ce_cs_pins[pi][0], ce_cs_pins[pi][1]);
-    if (radio->begin())
+    RF24* testradio = new RF24(ce_cs_pins[pi][0], ce_cs_pins[pi][1]);
+    if (testradio->begin())
+    {
+      radio = new RF24(ce_cs_pins[pi][0], ce_cs_pins[pi][1]);
       break;
-    else
-      radio = NULL;
+    }
   }
   if (!radio) {
     Serial.print(F("ERROR "));
