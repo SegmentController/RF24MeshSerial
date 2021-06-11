@@ -42,14 +42,14 @@ Before uploading the firmware, you can change several parameters to work immedia
 Important config:
 - SERIAL_SPEED: COM port speed
 - AUTOBEGIN_AS_MASTER: Autostart the nRF24 comm as a master node. Without this you build a slave-node and you must to specify nodeid before begin
-- RADIO_CE_CS_PIN: your hardware depending CE and CS pins
+- RADIO_CE_CS_PIN: your hardware depending CE and CS pins. (As version 1.1.0 you can use autodetection mechanism to find the radio)
 
 # Used libraries
 Modified SerialCommand library included/embed in project. It is optimized for this project: memory allocation, buffers length.
 You need to install manually the RF24Mesh (and RF24Network and RF24) library into Arduino IDE to compile.
 
 # Memory usage
-Default compile for Arduino Nano in Arduino IDE: Sketch size 18648 bytes (60%), variables are 1540 bytes (75%).
+Default compile for Arduino Nano in Arduino IDE: Sketch size 18744 bytes (61%), variables are 1521 bytes (74%).
 
 # Try it!
 Grab an Arduino RF Nano, upload the code on it and use a COM port monitor to see the engine. Try a few commands on the COM port. You are ready to create the RF24Mesh network!
