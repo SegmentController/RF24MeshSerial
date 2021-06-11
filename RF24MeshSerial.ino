@@ -2,7 +2,7 @@
    RF24MeshSerial
 **/
 
-#define RF24MESHSERIAL_VERSION      "1.0.2"
+#define RF24MESHSERIAL_VERSION      "1.1.0"
 
 #include <SPI.h>
 #include <RF24.h>
@@ -26,7 +26,14 @@
 #define DEFAULT_SPEED               RF24_250KBPS      // RF24_250KBPS, RF24_1MBPS or RF24_2MBPS
 #define MASH_AUTORENEW_INTERVAL_MS  750               // Non-master node automatic mesh connection check (and renew if needed) in every x ms
 
-#define RADIO_CE_CS_PIN             10,9              // RFnano=(10,9) or (9,10); Nano typical=(7,8), STM32=(PB0, PA4)
+#ifdef ARDUINO_AVR_NANO                               // RFnano=(10, 9) or (9, 10); Nano typical=(7, 8)
+#define RADIO_CE_CS_PINS            {{10, 9}, {9, 10}, {7, 8}}
+#elif STM32_CORE_VERSION                              // STM32=(PB0, PA4)
+#define RADIO_CE_CS_PINS            {{PB0, PA4}}
+#else                                                 // Other=(7, 8)
+#define RADIO_CE_CS_PINS            {{7, 8}}
+#endif
+
 #define RADIO_POWER                 RF24_PA_HIGH      // RF24_PA_MIN, RF24_PA_LOW, RF24_PA_HIGH, RF24_PA_MAX
 #define NETWORK_TIMEOUT_MS          750               // Network operation (dhcp, renew) timeout 1000..15000 (original default 7500, tipical 1500)
 #define NETWORK_DYNAMIC_TX_TIMEOUT                    // If enabled, random additional txTimeout will set
@@ -40,10 +47,12 @@
 
 #include "SerialCommand.h"
 
+typedef uint16_t pin_ce_cs_t[2];
+
 SerialCommand serialCmd;
-RF24 radio(RADIO_CE_CS_PIN);
-RF24Network network(radio);
-RF24Mesh mesh(radio, network);
+RF24* radio;
+RF24Network network(*radio);
+RF24Mesh mesh(*radio, network);
 bool hasbegin = false;
 uint8_t nodeid = 0;
 uint8_t channel = DEFAULT_CHANNEL;
@@ -71,18 +80,28 @@ void setup() {
 
   Serial.begin(SERIAL_SPEED);
 
-  if (!radio.begin()) {
+  cmdVersion();
+
+  pin_ce_cs_t ce_cs_pins[] = RADIO_CE_CS_PINS;
+  for (int pi = 0; pi < sizeof(ce_cs_pins) / sizeof(pin_ce_cs_t); pi++)
+  {
+    radio = new RF24(ce_cs_pins[pi][0], ce_cs_pins[pi][1]);
+    if (radio->begin())
+      break;
+    else
+      radio = NULL;
+  }
+  if (!radio) {
     Serial.print(F("ERROR "));
     Serial.println(F("Radio HW not found"));
     while (1);
   }
-  radio.setPALevel(RADIO_POWER);
+  radio->setPALevel(RADIO_POWER);
 
 #ifdef NETWORK_DYNAMIC_TX_TIMEOUT
   network.txTimeout = random(400, 750);
 #endif
 
-  cmdVersion();
   cmdHello();
 
 #ifdef AUTOBEGIN_AS_MASTER
