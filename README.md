@@ -57,7 +57,7 @@ Grab an Arduino RF Nano, upload the code on it and use a COM port monitor to see
 
 Example, type (bold text) these lines to master node and see results (normal text):
 
-VERSION 1.0
+VERSION 1.1.0
 
 READY
 
@@ -79,7 +79,7 @@ BEGIN OK
 
 Example, type (bold text) these lines to node with id 0x12 and see results (normal text):
 
-VERSION 1.0
+VERSION 1.1.0
 
 READY
 
