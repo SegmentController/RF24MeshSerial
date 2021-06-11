@@ -42,7 +42,7 @@ Before uploading the firmware, you can change several parameters to work immedia
 Important config:
 - SERIAL_SPEED: COM port speed
 - AUTOBEGIN_AS_MASTER: Autostart the nRF24 comm as a master node. Without this you build a slave-node and you must to specify nodeid before begin
-- RADIO_CE_CS_PIN: your hardware depending CE and CS pins. (As version 1.1.0 you can use autodetection mechanism to find the radio)
+- RADIO_CE_CS_PIN: your hardware depending CE and CS pins. (As version 1.1.0 you can use multiple values and automatic detection to find the radio)
 
 # Used libraries
 Modified SerialCommand library included/embed in project. It is optimized for this project: memory allocation, buffers length.
