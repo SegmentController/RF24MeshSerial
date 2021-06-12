@@ -347,7 +347,7 @@ void cmdSend() {
     if (mesh.write(&sndData, type, sndLength, to_node_id))
     {
       success = true;
-      Serial.println(F("SENT"));
+      Serial.print(F("SENT"));
       if (trycount)
       {
         Serial.print(F(" "));
