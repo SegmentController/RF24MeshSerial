@@ -24,7 +24,7 @@
 //#define AUTOBEGIN_AS_MASTER                           // Autostart as master (nodeID = 0)
 #define DEFAULT_CHANNEL             90                // 0..125 (2.400 to 2.525)
 #define DEFAULT_SPEED               RF24_250KBPS      // RF24_250KBPS, RF24_1MBPS or RF24_2MBPS
-#define MASH_AUTORENEW_INTERVAL_MS  750               // Non-master node automatic mesh connection check (and renew if needed) in every x ms
+#define MASH_AUTORENEW_INTERVAL_MS  30 * 1000         // Non-master node automatic mesh connection check (and renew if needed) in every x ms
 
 #ifdef ARDUINO_AVR_NANO                               // CE&CS: RFnano=(10, 9) or (9, 10);
 #define RADIO_CE_CS_PIN            {9, 10}
