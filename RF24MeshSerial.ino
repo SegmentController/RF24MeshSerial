@@ -36,7 +36,7 @@
 
 #define RADIO_POWER                 RF24_PA_HIGH      // RF24_PA_MIN, RF24_PA_LOW, RF24_PA_HIGH, RF24_PA_MAX
 #define NETWORK_TIMEOUT_MS          350               // Network operation (dhcp, renew) timeout 1000..15000 (original default 7500, tipical 750)
-#define NETWORK_DYNAMIC_TX_TIMEOUT                    // If enabled, random additional txTimeout will set
+//#define NETWORK_DYNAMIC_TX_TIMEOUT                  // If enabled, random additional txTimeout will set
 
 #define MESH_PAYLOAD_MAX_SIZE       128               // Maximum available payload size
 
@@ -74,13 +74,13 @@ void rebootFunc()
 void setup() {
   while (!Serial);
 
-#ifdef START_DELAY_MS
-  delay(START_DELAY_MS);
-#endif
-
   Serial.begin(SERIAL_SPEED);
 
   cmdVersion();
+
+#ifdef START_DELAY_MS
+  delay(START_DELAY_MS);
+#endif
 
   if (!radio.begin()) {
     Serial.print(F("ERROR "));
