@@ -2,7 +2,7 @@
    RF24MeshSerial
 **/
 
-#define RF24MESHSERIAL_VERSION      "1.1.0"
+#define RF24MESHSERIAL_VERSION      "1.1.1"
 
 #include <SPI.h>
 #include <RF24.h>
@@ -21,7 +21,9 @@
 #define START_DELAY_MS              500               // Some hardware bootup time
 #define LOOP_DELAY_MS               5                 // Some cool-down sleep
 
-//#define AUTOBEGIN_AS_MASTER                           // Autostart as master (nodeID = 0)
+//#define ENABLE_HEARTBEAT                              // HEARTBEAT function (for developers)
+
+#define AUTOBEGIN_AS_MASTER                           // Autostart as master (nodeID = 0)
 #define DEFAULT_CHANNEL             90                // 0..125 (2.400 to 2.525)
 #define DEFAULT_SPEED               RF24_250KBPS      // RF24_250KBPS, RF24_1MBPS or RF24_2MBPS
 #define MASH_AUTORENEW_INTERVAL_MS  30 * 1000         // Non-master node automatic mesh connection check (and renew if needed) in every x ms
@@ -38,7 +40,7 @@
 #define NETWORK_TIMEOUT_MS          350               // Network operation (dhcp, renew) timeout 1000..15000 (original default 7500, tipical 750)
 //#define NETWORK_DYNAMIC_TX_TIMEOUT                  // If enabled, random additional txTimeout will set
 
-#define MESH_PAYLOAD_MAX_SIZE       128               // Maximum available payload size
+#define MESH_PAYLOAD_MAX_SIZE       64               // Maximum available payload size
 
 #define NETWORK_SEND_RETRY          3                 // Default retry of send
 /**
@@ -58,7 +60,7 @@ uint8_t nodeid = 0;
 uint8_t channel = DEFAULT_CHANNEL;
 uint8_t retry = NETWORK_SEND_RETRY;
 rf24_datarate_e speed = DEFAULT_SPEED;
-unsigned long lastcheck = 0;
+uint32_t lastcheck = 0;
 
 #if defined(ARDUINO_AVR_NANO)
 void (*rebootFunc)(void) = 0;
@@ -72,6 +74,8 @@ void rebootFunc()
 #endif
 
 void setup() {
+  randomSeed(analogRead(0));
+
   while (!Serial);
 
   Serial.begin(SERIAL_SPEED);
@@ -107,7 +111,9 @@ void setup() {
   serialCmd.addCommand("HELLO", cmdHello);
   serialCmd.addCommand("BEGIN", cmdBegin);
   serialCmd.addCommand("SEND", cmdSend);
+#ifdef ENABLE_HEARTBEAT
   serialCmd.addCommand("HEARTBEAT", cmdHeartbeat);
+#endif
   serialCmd.addCommand("CHECK", cmdCheck);
   serialCmd.addCommand("RENEW", cmdRenew);
   serialCmd.addCommand("NODEID", cmdNodeId);
@@ -132,9 +138,11 @@ void setup() {
     Serial.println(F("BEGIN"));
     Serial.println(F("SEND NodeId Type [Data]"));
     Serial.println(F("ex: SEND 0x20 0x10 0x9D3CE3CBAC8352541647D2417942F56B"));
+#ifdef ENABLE_HEARTBEAT
     Serial.println(F("HEARTBEAT IntervalMSec NodeId Type"));
     Serial.println(F("ex: HEARTBEAT 500 0x00 0x10"));
     Serial.println(F("HEARTBEAT STOP"));
+#endif
     if (nodeid)
     {
       Serial.println(F("CHECK"));
@@ -178,7 +186,9 @@ void loop() {
 
   processReceived();
 
+#ifdef ENABLE_HEARTBEAT
   processHeartbeat();
+#endif
 
   serialCmd.readSerial();
 
@@ -198,7 +208,7 @@ void processReceived()
     int16_t from_node_id = mesh.getNodeID(rcvHeader.from_node);
     unsigned char type = rcvHeader.type;
 
-    uint16_t size = network.read(rcvHeader, &rcvData, sizeof(rcvData));
+    size_t size = network.read(rcvHeader, &rcvData, sizeof(rcvData));
 
     Serial.print(F("RECEIVE"));
 
@@ -367,10 +377,11 @@ void cmdSend() {
   }
 }
 
+#ifdef ENABLE_HEARTBEAT
 int sndHeartbeatInterval = 0;
 int sndHeartbeatNodeId = 0;
 unsigned char sndHeartbeatType = 0;
-unsigned long sndHeartbeatLastSent = 0;
+uint32_t sndHeartbeatLastSent = 0;
 void processHeartbeat()
 {
   if (!sndHeartbeatInterval)
@@ -379,9 +390,9 @@ void processHeartbeat()
   if (millis() - sndHeartbeatLastSent < sndHeartbeatInterval)
     return;
 
-  unsigned long now = millis();
+  uint32_t now = millis();
   bool success = false;
-  int trycount = 0;
+  uint8_t trycount = 0;
   while (!success && trycount <= retry)
   {
     if (mesh.write(&now, sndHeartbeatType, sizeof(now), sndHeartbeatNodeId))
@@ -540,6 +551,7 @@ void cmdHeartbeat()
   else
     Serial.println(F("HEARTBEAT STOPPED"));
 }
+#endif
 
 void cmdCheck() {
   if (!nodeid)

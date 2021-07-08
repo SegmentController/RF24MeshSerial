@@ -43,6 +43,7 @@ Important config:
 - SERIAL_SPEED: COM port speed
 - AUTOBEGIN_AS_MASTER: Autostart the nRF24 comm as a master node. Without this you build a slave-node and you must to specify nodeid before begin
 - RADIO_CE_CS_PIN: your hardware depending CE and CS pins.
+- ENABLE_HEARTBEAT: enable send same packet periodically. Useful for developers.
 
 # Used libraries
 Modified SerialCommand library included/embed in project. It is optimized for this project: memory allocation, buffers length.
@@ -57,7 +58,7 @@ Grab an Arduino RF Nano, upload the code on it and use a COM port monitor to see
 
 Example, type (bold text) these lines to master node and see results (normal text):
 
-VERSION 1.1.0
+VERSION 1.1.1
 
 READY
 
@@ -79,7 +80,7 @@ BEGIN OK
 
 Example, type (bold text) these lines to node with id 0x12 and see results (normal text):
 
-VERSION 1.1.0
+VERSION 1.1.1
 
 READY
 
