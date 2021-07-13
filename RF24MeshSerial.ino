@@ -83,7 +83,6 @@ void setup() {
   randomSeed(analogRead(0));
 
   while (!Serial);
-
   Serial.begin(SERIAL_SPEED);
 
   cmdVersion();
@@ -260,7 +259,7 @@ void processReceived()
 }
 
 void cmdHello() {
-  Serial.println(F("READY"));
+  Serial.println(F("RF24MESHSERIAL READY"));
 }
 
 void cmdVersion() {
