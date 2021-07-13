@@ -18,12 +18,14 @@
 #define SERIAL_SPEED                115200
 //#define SERIAL_COMMAND_ECHO                           // Enable echo of input (use SmarTTY or Arduino IDE COM window instead)
 
-#define START_DELAY_MS              500               // Some hardware bootup time
+#define START_DELAY_MS              50                // Some hardware bootup time
 #define LOOP_DELAY_MS               5                 // Some cool-down sleep
 
 //#define ENABLE_HEARTBEAT                              // HEARTBEAT function (for developers)
 
-#define AUTOBEGIN_AS_MASTER                           // Autostart as master (nodeID = 0)
+#define ENABLE_NEWNODE_ALERT                          // Alert (NEWNODE 5) when new node connected
+
+//#define AUTOBEGIN_AS_MASTER                           // Autostart as master (nodeID = 0)
 #define DEFAULT_CHANNEL             90                // 0..125 (2.400 to 2.525)
 #define DEFAULT_SPEED               RF24_250KBPS      // RF24_250KBPS, RF24_1MBPS or RF24_2MBPS
 #define MASH_AUTORENEW_INTERVAL_MS  30 * 1000         // Non-master node automatic mesh connection check (and renew if needed) in every x ms
@@ -61,6 +63,10 @@ uint8_t channel = DEFAULT_CHANNEL;
 uint8_t retry = NETWORK_SEND_RETRY;
 rf24_datarate_e speed = DEFAULT_SPEED;
 uint32_t lastcheck = 0;
+
+#ifdef ENABLE_NEWNODE_ALERT
+uint8_t prevnodecount = 0;
+#endif
 
 #if defined(ARDUINO_AVR_NANO)
 void (*rebootFunc)(void) = 0;
@@ -171,7 +177,18 @@ void loop() {
 
   if (!nodeid)
     if (hasbegin)
+    {
       mesh.DHCP();
+#ifdef ENABLE_NEWNODE_ALERT
+      if (prevnodecount < mesh.addrListTop)
+      {
+        Serial.print(F("NEWNODE "));
+        Serial.println(mesh.addrListTop);
+
+        prevnodecount = mesh.addrListTop;
+      }
+#endif
+    }
 
 #ifdef MASH_AUTORENEW_INTERVAL_MS
   if (nodeid)
