@@ -23,7 +23,7 @@
 
 //#define ENABLE_HEARTBEAT                              // HEARTBEAT function (for developers)
 
-#define ENABLE_NEWNODE_ALERT                          // Alert (NEWNODE 5) when new node connected
+#define ENABLE_NEWNODE_ALERT                          // Alert (NEWNODE) when new node connected
 
 //#define AUTOBEGIN_AS_MASTER                           // Autostart as master (nodeID = 0)
 #define DEFAULT_CHANNEL             90                // 0..125 (2.400 to 2.525)
@@ -181,9 +181,7 @@ void loop() {
 #ifdef ENABLE_NEWNODE_ALERT
       if (prevnodecount < mesh.addrListTop)
       {
-        Serial.print(F("NEWNODE "));
-        Serial.println(mesh.addrListTop);
-
+        Serial.println(F("NEWNODE"));
         prevnodecount = mesh.addrListTop;
       }
 #endif
