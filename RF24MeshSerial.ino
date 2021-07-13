@@ -764,15 +764,15 @@ void cmdNodeList()
     Serial.println(F("Node list available on master only"));
     return;
   }
-  Serial.println(F("NODELIST"));
+  Serial.print(F("NODELIST "));
   for (int i = 0; i < mesh.addrListTop; i++) {
     Serial.print(F("0x"));
     if (mesh.addrList[i].nodeID < 0x10)
       Serial.print(F("0"));
     Serial.print(mesh.addrList[i].nodeID, HEX);
-    Serial.print(F(" "));
-    Serial.println(mesh.addrList[i].address, OCT);
+    Serial.print(F("("));
+    Serial.print(mesh.addrList[i].address);
+    Serial.print(F(")"));
   }
-  Serial.print(F("NODELIST"));
-  Serial.println(F("END"));
+  Serial.println();
 }
