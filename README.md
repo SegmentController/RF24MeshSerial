@@ -21,15 +21,16 @@ This is how the idea of a small firmware that can be installed on an Arduino Nan
 - HELLO
 - BEGIN
 - SEND
-- HEARTBEAT
+- HEARTBEAT //disabled by default
 - RECEIVE
 - CHECK (network)
 - RENEW (address)
+- NODELIST
 - UPTIME
 - VERSION
 - HELP
 
-After I could manage the device through the COM port and manage the entire RF24Mesh network, I made a library for using it under Node.js: https://github.com/BCsabaEngine/RF24MeshSerialNode. I have published it on https://www.npmjs.com/package/rf24meshserialnode, you can install from npm by ```npm install rf24meshserialnode```.
+After I could manage the device through the COM port and manage the entire RF24Mesh network, I made a library for using it under Node.js: https://github.com/BCsabaEngine/RF24MeshSerialNode. I have published it on https://www.npmjs.com/package/rf24meshserialnode, you can install from npm by ```npm install rf24meshserialnode``` and create gracefully nodejs application based on it.
 
 # Hardware
 You can use it on any Arduino to which an nRF24 chip is attached. Or you can use the RFNano module immediately without soldering. The USB port is suitable for upload code, through which it receives the power supply and you can also implement the serial port communication on this. All you need is a USB data cable! A 30cm is enough, but the length doesn't matter, it can be up to 2m.
