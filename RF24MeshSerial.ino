@@ -19,7 +19,7 @@
 //#define SERIAL_COMMAND_ECHO                           // Enable echo of input (use SmarTTY or Arduino IDE COM window instead)
 
 #define START_DELAY_MS              50                // Some hardware bootup time
-#define LOOP_DELAY_MS               5                 // Some cool-down sleep
+#define LOOP_DELAY_MS               5                 // Some idle time
 
 //#define ENABLE_HEARTBEAT                              // HEARTBEAT function (for developers)
 
@@ -70,13 +70,13 @@ uint8_t prevnodecount = 0;
 
 #if defined(ARDUINO_AVR_NANO)
 void (*rebootFunc)(void) = 0;
-#endif
-
-#ifdef STM32_CORE_VERSION
+#elif defined(STM32_CORE_VERSION)
 void rebootFunc()
 {
   NVIC_SystemReset();
 }
+#else
+#error Invalid Platform
 #endif
 
 void setup() {
